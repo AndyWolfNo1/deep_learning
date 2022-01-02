@@ -149,7 +149,6 @@ res = build_model()
 
 ########################
 
-
 def get_raport(url, name, typ='biezace', date='0,0,0,1'):
     
     data = list()
@@ -188,3 +187,14 @@ def get_raport(url, name, typ='biezace', date='0,0,0,1'):
                 for i in tr[2:]:
                     data[1].append(i)
         return data
+          
+    tr = get_tr_from_soup(url)
+    try:
+        today = tr[1].text
+        data.append(today)
+        data.append(tr[2:])       
+    except:
+        return 'brak banych'
+    data = check_pages(data, url)
+    data = clean_data(data)
+    return data
