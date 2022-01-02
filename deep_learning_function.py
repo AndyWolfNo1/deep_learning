@@ -146,3 +146,54 @@ def build_model():
     return model
 
 res = build_model()
+
+########################
+
+
+def get_raport(url, name, typ='biezace', date='0,0,0,1'):
+    
+    data = list()
+    url = url+'/'+name+'/'+typ+','+date
+
+    def clean_data(data):
+        all_new_list = list()
+        new_list = list()
+        all_new_list.append(data[0].text.replace('\n',''))
+        td = data[1][0].find_all('td')
+        for i in range(len(td)):
+            new_list.append(td[i].text.replace('\n',''))
+        ahref = data[1][0].find_all('a')
+        new_list.append(ahref[1]['href'].split(',')[0].split('/')[-1])
+        all_new_list.append(new_list)
+        return all_new_list
+
+    def get_tr_from_soup(url):
+        resp = requests.get(url)
+        soup = bs(resp.text, 'html.parser')
+        tabs = soup.find_all('table')
+        tr = tabs[1].find_all('tr')
+        return tr
+
+    def check_pages(data, url):
+        test = numpy.arange(50, 700, 50)
+        for i in test:
+            if len(data[1]) == i:
+                last = int(url[-1])+1
+                url = url[0:-1]
+                url = url+str(last)
+                tr = get_soup(url)
+                for i in tr[2:]:
+                    data[1].append(i)
+        return data
+          
+    tr = get_tr_from_soup(url)
+    try:
+        today = tr[1]
+        data.append(today)
+        data.append(tr[2:])
+
+        data = check_pages(data, url)
+        data = clean_data(data)
+        return data
+    except:
+        return 'brak banych'
