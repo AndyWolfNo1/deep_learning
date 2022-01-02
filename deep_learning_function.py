@@ -156,16 +156,19 @@ def get_raport(url, name, typ='biezace', date='0,0,0,1'):
     url = url+'/'+name+'/'+typ+','+date
 
     def clean_data(data):
-        all_new_list = list()
+        main_list = list()
+        main_list.append(data[0].replace('\n', ''))
         new_list = list()
-        all_new_list.append(data[0].text.replace('\n',''))
-        td = data[1][0].find_all('td')
-        for i in range(len(td)):
-            new_list.append(td[i].text.replace('\n',''))
-        ahref = data[1][0].find_all('a')
-        new_list.append(ahref[1]['href'].split(',')[0].split('/')[-1])
-        all_new_list.append(new_list)
-        return all_new_list
+        for i in range(len(data[1])):
+            new_list_b = list()
+            td = data[1][i].find_all('td')
+            for j in range(len(td)):
+               new_list_b.append(td[j].text.replace('\n',''))
+            ahref = data[1][i].find_all('a')
+            new_list_b.append(ahref[2]['href'].split(',')[1].split('/')[-1])
+            new_list.append(new_list_b)
+        main_list.append(new_list)
+        return main_list
 
     def get_tr_from_soup(url):
         resp = requests.get(url)
@@ -181,19 +184,7 @@ def get_raport(url, name, typ='biezace', date='0,0,0,1'):
                 last = int(url[-1])+1
                 url = url[0:-1]
                 url = url+str(last)
-                tr = get_soup(url)
+                tr = get_tr_from_soup(url)
                 for i in tr[2:]:
                     data[1].append(i)
         return data
-          
-    tr = get_tr_from_soup(url)
-    try:
-        today = tr[1]
-        data.append(today)
-        data.append(tr[2:])
-
-        data = check_pages(data, url)
-        data = clean_data(data)
-        return data
-    except:
-        return 'brak banych'
